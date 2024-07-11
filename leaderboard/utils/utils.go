@@ -3,7 +3,6 @@ package utils
 import (
 	"context"
 	"errors"
-	"fmt"
 	"log"
 
 	"github.com/redis/go-redis/v9"
@@ -29,6 +28,28 @@ func GetTopNLeaderboard(client *redis.Client, n int) ([]redis.Z, error) {
 		return nil, errors.New("error retrieving leaderboard")
 	}
 
-	fmt.Println("Elements in sorted set (in reverse order):", results)
+	// fmt.Println("Elements in sorted set (in reverse order):", results)
+	return results, nil
+}
+
+func GetUserRankAndScore(client *redis.Client, userId string) (*redis.RankScore, error) {
+	ctx := context.Background()
+
+	results, err := client.ZRankWithScore(ctx, "leaderboard", userId).Result()
+	if err != nil {
+		return nil, errors.New("error retrieving leaderboard")
+	}
+
+	return &results, nil
+}
+
+func GetUserByRank(client *redis.Client, rank int) ([]redis.Z, error) {
+	ctx := context.Background()
+
+	results, err := client.ZRevRangeWithScores(ctx, "leaderboard", int64(rank-1), int64(rank-1)).Result()
+	if err != nil {
+		return nil, errors.New("error retrieving leaderboard")
+	}
+
 	return results, nil
 }

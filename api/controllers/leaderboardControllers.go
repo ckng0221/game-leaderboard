@@ -19,10 +19,36 @@ func GetTopN(c *gin.Context) {
 		}
 		topInt = topIntParsed
 	}
-	userIds, err := leaderboard.GetTopNLeaderboard(initializers.RedisClient, topInt)
+	results, err := leaderboard.GetTopNLeaderboard(initializers.RedisClient, topInt)
 	if err != nil {
 		c.AbortWithStatusJSON(500, gin.H{"error": "Invalid top value"})
 	}
 
-	c.JSON(http.StatusOK, userIds)
+	c.JSON(http.StatusOK, results)
+}
+
+func GetUserRankScore(c *gin.Context) {
+	userId := c.Param("id")
+
+	rankScore, err := leaderboard.GetUserRankAndScore(initializers.RedisClient, userId)
+	if err != nil {
+		c.AbortWithStatusJSON(500, gin.H{"error": "Invalid top value"})
+	}
+
+	c.JSON(http.StatusOK, rankScore)
+}
+
+func GetUserByRank(c *gin.Context) {
+	rank := c.Param("rank")
+	rank_int, err := strconv.Atoi(rank)
+	if err != nil {
+		c.AbortWithStatusJSON(400, gin.H{"error": "Invalid rank value"})
+	}
+
+	rankScore, err := leaderboard.GetUserByRank(initializers.RedisClient, rank_int)
+	if err != nil {
+		c.AbortWithStatusJSON(500, gin.H{"error": "Invalid top value"})
+	}
+
+	c.JSON(http.StatusOK, rankScore)
 }
