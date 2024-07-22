@@ -1,4 +1,5 @@
 export interface IGameplay {
+  id: string;
   score: number;
   user_id: string;
   CreatedAt: string;

@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"api/initializers"
+	"api/models"
 	"fmt"
 	leaderboard "leaderboard/utils"
 	"net/http"
@@ -9,6 +10,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
+
+type LeaderboardData struct {
+	Rank     int    `json:"rank"`
+	Username string `json:"username"`
+	Score    int    `json:"score"`
+}
 
 func GetTopN(c *gin.Context) {
 	var topInt int = 10
@@ -28,7 +35,30 @@ func GetTopN(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, results)
+	// modify table to create leaderboard table
+	var leaderboardTable []LeaderboardData
+	var users []models.User
+	var user_ids []string
+	for _, result := range results {
+		user_ids = append(user_ids, result.Member.(string))
+	}
+	err = initializers.Db.Find(&users, user_ids).Error
+	if err != nil || len(users) != len(user_ids) {
+		fmt.Println(err.Error())
+		c.AbortWithStatus(500)
+		return
+	}
+
+	for i, result := range results {
+		leaderboard := LeaderboardData{
+			Rank:     i + 1,
+			Username: users[i].Username,
+			Score:    int(result.Score),
+		}
+		leaderboardTable = append(leaderboardTable, leaderboard)
+	}
+
+	c.JSON(http.StatusOK, leaderboardTable)
 }
 
 func GetUserRankScore(c *gin.Context) {
