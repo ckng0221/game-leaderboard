@@ -11,10 +11,12 @@ services:
       - ./apps/api/.env
     environment:
       - ENV=production
-      - DB_URL=dbuser:dbuser123@tcp(mysql:3306)/job-scheduler?charset=utf8mb4&parseTime=True&loc=UTC
-      - BLOB_DIRECTORY=/home/blob
+      - DB_URL=dbuser:dbuser123@tcp(mysql:3306)/game_leaderboard?charset=utf8mb4&parseTime=True&loc=UTC
+      - REDIS_HOST=redis:6379
+      - REDIS_PASSWORD=redispoconlypassword
     depends_on:
       - mysql
+      - redis
     restart: always
     networks:
       - private
@@ -66,19 +68,19 @@ services:
   #   restart: always
 
   # dependencies
-  rabbitmq:
-    image: rabbitmq
-    # ports: # optional expose
-    #   - "5672:5672"
-    networks:
-      - private
+  # rabbitmq:
+  #   image: rabbitmq
+  #   # ports: # optional expose
+  #   #   - "5672:5672"
+  #   networks:
+  #     - private
 
   mysql:
     image: mysql:8.0
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD_ENCRYPTED: false
-      MYSQL_DATABASE: "job-scheduler"
+      MYSQL_DATABASE: "game_leaderboard"
       MYSQL_USER: "dbuser"
       MYSQL_ROOT_PASSWORD: "dbuser123"
       MYSQL_PASSWORD: "dbuser123"
@@ -93,9 +95,9 @@ services:
   redis:
     image: redis:6.2-alpine
     restart: always
-    ports:
-      - "6379:6379"
-    # command: redis-server --save 20 1 --loglevel warning --requirepass redispoconlypassword
+    # ports:
+    #   - "6379:6379"
+    command: redis-server --save 20 1 --loglevel warning --requirepass redispoconlypassword
     volumes:
       - redis-db:/data
     networks:
