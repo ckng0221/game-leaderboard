@@ -11,8 +11,9 @@ import {
 import "./App.css";
 import LeaderboardTable from "./components/LeaderboardTable";
 import { getUsers, IRankScore, IUser } from "./api/user";
-import { Button } from "@mui/material";
+import { Button, CircularProgress } from "@mui/material";
 import { createGameplay } from "./api/gameplay";
+import { toast } from "react-hot-toast";
 
 function App() {
   const [leaderboards, setLeaderboards] = useState<ILeaderboard[]>([]);
@@ -28,9 +29,11 @@ function App() {
     // fetch leaderboard
     async function fetchData() {
       const data = await getTopNLeaderboard(10);
-      if (data) {
-        setLeaderboards(data);
+      if (!data) {
+        toast.error("Failed to fetch leaderboard");
+        return;
       }
+      setLeaderboards(data);
     }
 
     fetchData();
@@ -39,9 +42,11 @@ function App() {
   useEffect(() => {
     async function fetchUsers() {
       const data = await getUsers();
-      if (data) {
-        setUsers(data);
+      if (!data) {
+        toast.error("Failed to fetch users");
+        return;
       }
+      setUsers(data);
     }
 
     fetchUsers();
@@ -58,7 +63,10 @@ function App() {
   }
 
   async function handlePlayGame() {
-    if (!currentUserId) return;
+    if (!currentUserId) {
+      toast.error("Please choose user first");
+      return;
+    }
 
     const data = await createGameplay({ user_id: currentUserId });
     if (!data) return;
@@ -69,15 +77,20 @@ function App() {
       setCurrentUserScoreRank(rankScore);
     }
     setLeaderboardState((prev) => prev + 1);
+    toast.success("Gameplay score +10");
   }
 
   return (
     <>
-      <h2>Top 10 Leaderboard</h2>
-      <LeaderboardTable
-        rows={leaderboards}
-        columns={["Rank", "Name", "Score"]}
-      />
+      <h2 className="mb-8 font-bold text-xl">Game Leaderboard</h2>
+      {leaderboards.length == 0 ? (
+        <CircularProgress />
+      ) : (
+        <LeaderboardTable
+          rows={leaderboards}
+          columns={["Rank", "Name", "Score"]}
+        />
+      )}
       <br />
       {/* Current User */}
       <div>
