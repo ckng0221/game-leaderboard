@@ -35,10 +35,16 @@ func GetTopNLeaderboard(client *redis.Client, n int) ([]redis.Z, error) {
 func GetUserRankAndScore(client *redis.Client, userId string) (*redis.RankScore, error) {
 	ctx := context.Background()
 
-	results, err := client.ZRankWithScore(ctx, "leaderboard", userId).Result()
+	results, err := client.ZRevRankWithScore(ctx, "leaderboard", userId).Result()
 	if err != nil {
-		return nil, errors.New("error retrieving leaderboard")
+		if errors.Is(err, redis.Nil) {
+			return nil, nil
+		} else {
+			log.Println(err.Error())
+			return nil, errors.New("error retrieving leaderboard")
+		}
 	}
+	results.Rank += 1
 
 	return &results, nil
 }

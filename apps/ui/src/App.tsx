@@ -41,15 +41,19 @@ function App() {
   const [users, setUsers] = useState<IUser[]>([]);
   const [currentUserId, setCurrentUserId] = useState<string>("");
   const [currentUserScoreRank, setCurrentUserScoreRank] = useState<IRankScore>({
-    Score: 0,
-    Rank: 0,
+    Score: "-",
+    Rank: "-",
   });
 
   async function handleChangeUser(e: SelectChangeEvent<string>) {
     setCurrentUserId(e.target.value as string);
     const rankScore = await getUserRankScore(e.target.value);
-    if (!rankScore) return;
-    setCurrentUserScoreRank(rankScore);
+    console.log(rankScore);
+    if (!rankScore) {
+      setCurrentUserScoreRank({ Rank: "-", Score: "-" });
+    } else {
+      setCurrentUserScoreRank(rankScore);
+    }
   }
 
   return (
