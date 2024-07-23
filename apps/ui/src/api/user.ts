@@ -1,7 +1,11 @@
 export interface IUser {
-  id: string;
+  ID: string;
   username: string;
   role: string;
+}
+export interface IRankScore {
+  Score: number;
+  Rank: number;
 }
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;

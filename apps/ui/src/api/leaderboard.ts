@@ -1,3 +1,5 @@
+import { IRankScore as IRankScore } from "./user";
+
 export interface ILeaderboard {
   Rank: number;
   Username: string;
@@ -27,7 +29,7 @@ export async function getUserRankScore(userId: string) {
   try {
     const res = await fetch(endpoint, { method: "GET" });
     if (res.ok) {
-      const data: ILeaderboard = await res.json();
+      const data: IRankScore = await res.json();
       return data;
     }
     console.error(res.status, res.statusText);

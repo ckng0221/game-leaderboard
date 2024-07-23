@@ -28,9 +28,9 @@ export default function LeaderboardTable({
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows.map((row: any) => (
+          {rows.map((row: any, idx: number) => (
             <TableRow
-              key={row.name}
+              key={idx}
               sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
             >
               <TableCell align="right">{row.rank}</TableCell>
