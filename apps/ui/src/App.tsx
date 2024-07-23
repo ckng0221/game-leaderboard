@@ -10,10 +10,11 @@ import {
 } from "./api/leaderboard";
 import "./App.css";
 import LeaderboardTable from "./components/LeaderboardTable";
-import { getUsers, IRankScore, IUser } from "./api/user";
-import { Button, CircularProgress } from "@mui/material";
+import { createTestUser, getUsers, IRankScore, IUser } from "./api/user";
+import { Button, CircularProgress, IconButton, Tooltip } from "@mui/material";
 import { createGameplay } from "./api/gameplay";
 import { toast } from "react-hot-toast";
+import PersonAddAltIcon from "@mui/icons-material/PersonAddAlt";
 
 function App() {
   const [leaderboards, setLeaderboards] = useState<ILeaderboard[]>([]);
@@ -24,16 +25,16 @@ function App() {
     Rank: "-",
   });
   const [leaderboardState, setLeaderboardState] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // fetch leaderboard
     async function fetchData() {
       const data = await getTopNLeaderboard(10);
-      if (!data) {
-        toast.error("Failed to fetch leaderboard");
-        return;
+      if (data) {
+        setLeaderboards(data);
       }
-      setLeaderboards(data);
+      setLoading(false);
     }
 
     fetchData();
@@ -50,7 +51,7 @@ function App() {
     }
 
     fetchUsers();
-  }, []);
+  }, [leaderboardState]);
 
   async function handleChangeUser(e: SelectChangeEvent<string>) {
     setCurrentUserId(e.target.value as string);
@@ -80,10 +81,20 @@ function App() {
     toast.success("Gameplay score +10");
   }
 
+  async function handleCreateTestUser() {
+    const users = await createTestUser();
+    if (!users) {
+      toast.error("Error creating test user");
+      return;
+    }
+    setLeaderboardState((prev) => prev + 1);
+    toast.success("Created test user!");
+  }
+
   return (
     <>
       <h2 className="mb-8 font-bold text-xl">Game Leaderboard</h2>
-      {leaderboards.length == 0 ? (
+      {loading ? (
         <CircularProgress />
       ) : (
         <LeaderboardTable
@@ -125,6 +136,18 @@ function App() {
             </Button>
           </div>
         </div>
+      </div>
+      {/* Add User */}
+      <div className="absolute bottom-0 right-0 h-16 w-32">
+        <Tooltip title="Create test user">
+          <IconButton
+            color="error"
+            aria-label="Create test user"
+            onClick={handleCreateTestUser}
+          >
+            <PersonAddAltIcon />
+          </IconButton>
+        </Tooltip>
       </div>
     </>
   );

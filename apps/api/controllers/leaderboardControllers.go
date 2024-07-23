@@ -36,6 +36,11 @@ func GetTopN(c *gin.Context) {
 		return
 	}
 
+	if len(results) == 0 {
+		c.Status(200)
+		return
+	}
+
 	// modify table to create leaderboard table
 	var leaderboardTable []LeaderboardData
 	var users []models.User
