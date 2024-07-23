@@ -5,6 +5,7 @@ import (
 	"api/models"
 	"fmt"
 	leaderboard "leaderboard/utils"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -44,15 +45,24 @@ func GetTopN(c *gin.Context) {
 	}
 	err = initializers.Db.Find(&users, user_ids).Error
 	if err != nil || len(users) != len(user_ids) {
-		fmt.Println(err.Error())
+		if len(users) != len(user_ids) {
+			log.Println("Users and fetched users from db are not tally")
+		} else {
+			log.Println(err.Error())
+		}
 		c.AbortWithStatus(500)
 		return
+	}
+
+	userid_hashtable := map[string]models.User{}
+	for _, user := range users {
+		userid_hashtable[fmt.Sprint(user.ID)] = user
 	}
 
 	for i, result := range results {
 		leaderboard := LeaderboardData{
 			Rank:     i + 1,
-			Username: users[i].Username,
+			Username: userid_hashtable[result.Member.(string)].Username,
 			Score:    int(result.Score),
 		}
 		leaderboardTable = append(leaderboardTable, leaderboard)

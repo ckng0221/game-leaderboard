@@ -12,8 +12,18 @@ import "./App.css";
 import LeaderboardTable from "./components/LeaderboardTable";
 import { getUsers, IRankScore, IUser } from "./api/user";
 import { Button } from "@mui/material";
+import { createGameplay } from "./api/gameplay";
 
 function App() {
+  const [leaderboards, setLeaderboards] = useState<ILeaderboard[]>([]);
+  const [users, setUsers] = useState<IUser[]>([]);
+  const [currentUserId, setCurrentUserId] = useState<string>("");
+  const [currentUserScoreRank, setCurrentUserScoreRank] = useState<IRankScore>({
+    Score: "-",
+    Rank: "-",
+  });
+  const [leaderboardState, setLeaderboardState] = useState(0);
+
   useEffect(() => {
     // fetch leaderboard
     async function fetchData() {
@@ -24,7 +34,7 @@ function App() {
     }
 
     fetchData();
-  }, []);
+  }, [leaderboardState]);
 
   useEffect(() => {
     async function fetchUsers() {
@@ -37,23 +47,28 @@ function App() {
     fetchUsers();
   }, []);
 
-  const [leaderboards, setLeaderboards] = useState<ILeaderboard[]>([]);
-  const [users, setUsers] = useState<IUser[]>([]);
-  const [currentUserId, setCurrentUserId] = useState<string>("");
-  const [currentUserScoreRank, setCurrentUserScoreRank] = useState<IRankScore>({
-    Score: "-",
-    Rank: "-",
-  });
-
   async function handleChangeUser(e: SelectChangeEvent<string>) {
     setCurrentUserId(e.target.value as string);
     const rankScore = await getUserRankScore(e.target.value);
-    console.log(rankScore);
     if (!rankScore) {
       setCurrentUserScoreRank({ Rank: "-", Score: "-" });
     } else {
       setCurrentUserScoreRank(rankScore);
     }
+  }
+
+  async function handlePlayGame() {
+    if (!currentUserId) return;
+
+    const data = await createGameplay({ user_id: currentUserId });
+    if (!data) return;
+    const rankScore = await getUserRankScore(currentUserId);
+    if (!rankScore) {
+      setCurrentUserScoreRank({ Rank: "-", Score: "-" });
+    } else {
+      setCurrentUserScoreRank(rankScore);
+    }
+    setLeaderboardState((prev) => prev + 1);
   }
 
   return (
@@ -92,7 +107,9 @@ function App() {
           <div>{currentUserScoreRank.Score}</div>
           <div>{currentUserScoreRank.Rank}</div>
           <div>
-            <Button variant="contained">Play Game</Button>
+            <Button variant="contained" onClick={handlePlayGame}>
+              Play Game
+            </Button>
           </div>
         </div>
       </div>
