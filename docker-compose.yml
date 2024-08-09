@@ -22,50 +22,21 @@ services:
       - private
     links:
       - mysql
+    # ports:
+    #   - "8000:8000"
+
+  ui:
+    build:
+      context: ./apps/ui
+      args:
+        - VITE_API_BASE_URL=http://game-leaderboard.127.0.0.1.nip.io/api
     ports:
-      - "8000:8000"
-
-  # scheduler:
-  #   build:
-  #     context: .
-  #     dockerfile: ./apps/Dockerfile.service
-  #     target: production
-  #     args:
-  #       service: scheduler
-  #   env_file:
-  #     - ./apps/scheduler/.env
-  #   environment:
-  #     - RABBIT_MQ_HOST=amqp://rabbitmq:5672
-  #     - API_BASE_URL=http://api:8000
-  #   depends_on:
-  #     - rabbitmq
-  #     - api
-  #   networks:
-  #     - private
-  #   links:
-  #     - rabbitmq
-  #     - api
-  #   restart: always
-
-  # ui:
-  #   build:
-  #     context: .
-  #     dockerfile: ./apps/Dockerfile.ui
-  #     args:
-  #       extensions: ".sh"
-  #   env_file:
-  #     - ./apps/ui/.env.production
-  #   environment:
-  #     - BACKEND_HOST_INTERNAL=http://api:8000
-  #   depends_on:
-  #     - api
-  #   ports:
-  #     - "3000:3000"
-  #   links:
-  #     - api
-  #   networks:
-  #     - private
-  #   restart: always
+      - 80:80
+    networks:
+      - private
+      - public
+    depends_on:
+      - api
 
   # dependencies
   # rabbitmq:
@@ -93,7 +64,7 @@ services:
       - private
 
   redis:
-    image: redis:6.2-alpine
+    image: redis:7.2-alpine
     restart: always
     # ports:
     #   - "6379:6379"
@@ -108,6 +79,7 @@ volumes:
   redis-db:
     driver: local
 networks:
+  public:
   private:
     driver: bridge
 # ---

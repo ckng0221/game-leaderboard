@@ -13,15 +13,21 @@ import (
 )
 
 func GetAllUsers(c *gin.Context) {
-	email := c.Query("email")
-
-	m := make(map[string]interface{})
-
-	if email != "" {
-		m["email"] = email
-	}
+	username := c.Query("username")
+	last := c.Query("last")
 
 	var users []models.User
+	m := make(map[string]interface{})
+
+	if username != "" {
+		m["username"] = username
+	}
+	if last != "" && last == "true" {
+		initializers.Db.Last(&users)
+		c.JSON(http.StatusOK, users)
+		return
+	}
+
 	initializers.Db.Scopes(utils.Paginate(c)).Where(m).Find(&users)
 
 	c.JSON(http.StatusOK, users)

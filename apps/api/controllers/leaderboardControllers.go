@@ -2,13 +2,21 @@ package controllers
 
 import (
 	"api/initializers"
+	"api/models"
 	"fmt"
 	leaderboard "leaderboard/utils"
+	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
+
+type LeaderboardData struct {
+	Rank     int    `json:"rank"`
+	Username string `json:"username"`
+	Score    int    `json:"score"`
+}
 
 func GetTopN(c *gin.Context) {
 	var topInt int = 10
@@ -28,7 +36,44 @@ func GetTopN(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, results)
+	if len(results) == 0 {
+		c.Status(200)
+		return
+	}
+
+	// modify table to create leaderboard table
+	var leaderboardTable []LeaderboardData
+	var users []models.User
+	var user_ids []string
+	for _, result := range results {
+		user_ids = append(user_ids, result.Member.(string))
+	}
+	err = initializers.Db.Find(&users, user_ids).Error
+	if err != nil || len(users) != len(user_ids) {
+		if len(users) != len(user_ids) {
+			log.Println("Users and fetched users from db are not tally")
+		} else {
+			log.Println(err.Error())
+		}
+		c.AbortWithStatus(500)
+		return
+	}
+
+	userid_hashtable := map[string]models.User{}
+	for _, user := range users {
+		userid_hashtable[fmt.Sprint(user.ID)] = user
+	}
+
+	for i, result := range results {
+		leaderboard := LeaderboardData{
+			Rank:     i + 1,
+			Username: userid_hashtable[result.Member.(string)].Username,
+			Score:    int(result.Score),
+		}
+		leaderboardTable = append(leaderboardTable, leaderboard)
+	}
+
+	c.JSON(http.StatusOK, leaderboardTable)
 }
 
 func GetUserRankScore(c *gin.Context) {
