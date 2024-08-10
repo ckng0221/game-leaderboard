@@ -11,12 +11,6 @@ import (
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
-func failOnError(err error, msg string) {
-	if err != nil {
-		log.Panicf("%s: %s", msg, err)
-	}
-}
-
 var RabbitMqConn *amqp.Connection
 
 type RabbitMq struct {
@@ -36,6 +30,19 @@ func NewRabbitMQ(amqpURL, exchangeName string) (*RabbitMq, error) {
 		return nil, fmt.Errorf("failed to open a channel: %w", err)
 	}
 
+	err = channel.ExchangeDeclare(
+		exchangeName, // name
+		"fanout",     // type
+		true,         // durable
+		false,        // auto-deleted
+		false,        // internal
+		false,        // no-wait
+		nil,          // arguments
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to declare an exchange: %w", err)
+	}
+
 	return &RabbitMq{
 		conn:         conn,
 		channel:      channel,
@@ -49,19 +56,6 @@ func (r *RabbitMq) Close() {
 }
 
 func (r *RabbitMq) PublishScore(userId uint, score int) error {
-	err := r.channel.ExchangeDeclare(
-		r.exchangeName, // name
-		"fanout",       // type
-		true,           // durable
-		false,          // auto-deleted
-		false,          // internal
-		false,          // no-wait
-		nil,            // arguments
-	)
-	if err != nil {
-		return fmt.Errorf("failed to declare an exchange: %w", err)
-	}
-
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 

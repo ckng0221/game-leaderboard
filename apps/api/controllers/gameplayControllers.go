@@ -11,8 +11,6 @@ import (
 	"net/http"
 	"time"
 
-	leaderboard "leaderboard/utils"
-
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -67,7 +65,7 @@ func CreateGameplay(c *gin.Context) {
 		return
 	}
 
-	go leaderboard.IncrementUserScore(initializers.RedisClient, gameplay.UserID, gameplay.Score)
+	// go leaderboard.IncrementUserScore(initializers.RedisClient, gameplay.UserID, gameplay.Score)
 
 	// Update score in DB
 	var score models.Score
