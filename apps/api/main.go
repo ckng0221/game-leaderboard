@@ -9,6 +9,7 @@ func init() {
 	initializers.LoadEnvVariables()
 	initializers.ConnectToDb()
 	initializers.ConnectToRedis()
+	initializers.ConnectToRabbitMq()
 	initializers.SynDatabase()
 }
 

@@ -17,7 +17,7 @@ func IncrementUserScore(client *redis.Client, user_id uint, score int) {
 		log.Println("error adding score")
 		return
 	}
-	log.Printf("Added score: %v tor UserID: %v.\n", score, user_id)
+	log.Printf("Added score: %v to UserID: %v.\n", score, user_id)
 }
 
 func GetTopNLeaderboard(client *redis.Client, n int) ([]redis.Z, error) {
