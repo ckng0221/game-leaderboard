@@ -20,7 +20,7 @@ type ScoreEvent struct {
 
 func main() {
 	rabbitMqHost := os.Getenv("RABBIT_MQ_HOST")
-	exchangeName := os.Getenv("EXCHANGE_NAME")
+	exchangeName := os.Getenv("RABBIT_MQ_EXCHANGE_NAME")
 
 	rabbitMQ, err := utils.RabbitMQConsumer(rabbitMqHost, exchangeName)
 	if err != nil {

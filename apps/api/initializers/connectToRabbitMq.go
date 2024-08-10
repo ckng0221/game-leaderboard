@@ -91,7 +91,7 @@ var RabbitMqObj *RabbitMq
 
 func ConnectToRabbitMq() {
 	rabbitMqHost := os.Getenv("RABBIT_MQ_HOST")
-	exchangeName := os.Getenv("EXCHANGE_NAME")
+	exchangeName := os.Getenv("RABBIT_MQ_EXCHANGE_NAME")
 
 	var err error
 	RabbitMqObj, err = NewRabbitMQ(rabbitMqHost, exchangeName)

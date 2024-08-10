@@ -14,14 +14,40 @@ services:
       - DB_URL=dbuser:dbuser123@tcp(mysql:3306)/game_leaderboard?charset=utf8mb4&parseTime=True&loc=UTC
       - REDIS_HOST=redis:6379
       - REDIS_PASSWORD=redispoconlypassword
+      - RABBIT_MQ_HOST=amqp://rabbitmq:5672
     depends_on:
       - mysql
       - redis
+      - rabbitmq
     restart: always
     networks:
       - private
-    links:
-      - mysql
+    # links:
+    #   - mysql
+    # ports:
+    #   - "8000:8000"
+
+  leaderboard:
+    build:
+      context: .
+      dockerfile: ./apps/Dockerfile.service
+      target: production
+      args:
+        service: leaderboard
+    env_file:
+      - ./apps/leaderboard/.env
+    environment:
+      - REDIS_HOST=redis:6379
+      - REDIS_PASSWORD=redispoconlypassword
+      - RABBIT_MQ_HOST=amqp://rabbitmq:5672
+    depends_on:
+      - redis
+      - rabbitmq
+    restart: always
+    networks:
+      - private
+    # links:
+    #   - mysql
     # ports:
     #   - "8000:8000"
 
@@ -37,14 +63,15 @@ services:
       - public
     depends_on:
       - api
+      - leaderboard
 
   # dependencies
-  # rabbitmq:
-  #   image: rabbitmq
-  #   # ports: # optional expose
-  #   #   - "5672:5672"
-  #   networks:
-  #     - private
+  rabbitmq:
+    image: rabbitmq
+    # ports: # optional expose
+    #   - "5672:5672"
+    networks:
+      - private
 
   mysql:
     image: mysql:8.0

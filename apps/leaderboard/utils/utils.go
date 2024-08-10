@@ -14,7 +14,7 @@ func IncrementUserScore(client *redis.Client, user_id uint, score int) {
 	err := client.ZAddArgsIncr(ctx, "leaderboard", redis.ZAddArgs{Members: []redis.Z{{Score: float64(score), Member: user_id}}}).Err()
 
 	if err != nil {
-		log.Println("error adding score")
+		log.Println("error adding score: %w", err)
 		return
 	}
 	log.Printf("Added score: %v to UserID: %v.\n", score, user_id)
