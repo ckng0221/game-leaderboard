@@ -57,15 +57,13 @@ func CreateGameplay(c *gin.Context) {
 		return
 	}
 
-	// Publish score event to event queue
-	err = initializers.RabbitMqObj.PublishScore(gameplay.UserID, gameplayScore)
-	if err != nil {
-		log.Println(err)
-		c.AbortWithStatus(500)
-		return
-	}
-
-	// go leaderboard.IncrementUserScore(initializers.RedisClient, gameplay.UserID, gameplay.Score)
+	// Publish score event to event queue async
+	go initializers.RabbitMqObj.PublishScore(gameplay.UserID, gameplayScore)
+	// if err != nil {
+	// 	log.Println(err)
+	// 	c.AbortWithStatus(500)
+	// 	return
+	// }
 
 	// Update score in DB
 	var score models.Score
