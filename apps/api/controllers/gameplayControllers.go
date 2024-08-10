@@ -7,11 +7,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
+	"time"
 
 	leaderboard "leaderboard/utils"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 func GetAllGameplays(c *gin.Context) {
@@ -46,14 +49,49 @@ func CreateGameplay(c *gin.Context) {
 	}
 
 	// Fixed 10 score for 1 game
-	gameplay.Score = 10
+	gameplayScore := 10
+	gameplay.Score = gameplayScore
 
 	result := initializers.Db.Create(&gameplay)
 	if result.Error != nil {
+		log.Println(err)
 		c.AbortWithStatus(500)
 		return
 	}
+
+	//TODO: Pusblish message asynchronously
 	go leaderboard.IncrementUserScore(initializers.RedisClient, gameplay.UserID, gameplay.Score)
+
+	// Update score in DB
+	var score models.Score
+	month := time.Date(time.Now().Year(), time.Now().Month(), 1, 0, 0, 0, 0, time.Now().UTC().Location())
+	err = initializers.Db.Where("month = ? AND user_id = ?", month, gameplay.UserID).Find(&score).Error
+	if err != nil {
+		log.Println(err)
+		c.AbortWithStatus(500)
+		return
+	}
+	if score.ID != 0 {
+		// If existing, update score
+		expression := "score + ?"
+		err = initializers.Db.Model(&score).UpdateColumn("score", gorm.Expr(expression, gameplayScore)).Error
+		if err != nil {
+			log.Println(err)
+			c.AbortWithStatus(500)
+			return
+		}
+	} else {
+		score.UserID = gameplay.UserID
+		score.Score = gameplayScore
+		score.Month = &month
+
+		err = initializers.Db.Create(&score).Error
+		if err != nil {
+			log.Println(err)
+			c.AbortWithStatus(500)
+			return
+		}
+	}
 
 	c.JSON(http.StatusCreated, gameplay)
 }
