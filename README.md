@@ -40,8 +40,7 @@ A separate record of the users of a particular month will also be stored in the 
 ## API, Leaderboard
 
 - Programming Language: [Go](https://go.dev/)
-- Server Framework: [Chi](https://go-chi.io/)
-- Payment Gateway: [Stripe](https://stripe.com)
+- Server Framework: [Gin](https://gin-gonic.com/)
 - ORM: [Gorm](https://gorm.io/)
 - Database: [MySQL](https://www.mysql.com/)
 - Sorted Set : [Redis](https://redis.io/)
