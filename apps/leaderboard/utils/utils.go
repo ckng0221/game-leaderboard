@@ -3,6 +3,7 @@ package utils
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
 
 	"github.com/redis/go-redis/v9"
@@ -14,10 +15,10 @@ func IncrementUserScore(client *redis.Client, user_id uint, score int) {
 	err := client.ZAddArgsIncr(ctx, "leaderboard", redis.ZAddArgs{Members: []redis.Z{{Score: float64(score), Member: user_id}}}).Err()
 
 	if err != nil {
-		log.Println("error adding score")
+		log.Println("error adding score: %w", err)
 		return
 	}
-	log.Printf("Added score: %v tor UserID: %v.\n", score, user_id)
+	log.Printf("Added score: %v to UserID: %v.\n", score, user_id)
 }
 
 func GetTopNLeaderboard(client *redis.Client, n int) ([]redis.Z, error) {
@@ -58,4 +59,13 @@ func GetUserByRank(client *redis.Client, rank int) ([]redis.Z, error) {
 	}
 
 	return results, nil
+}
+
+func ClearLeaderboard(client *redis.Client) error {
+	ctx := context.Background()
+	err := client.Del(ctx, "leaderboard").Err()
+	if err != nil {
+		return fmt.Errorf("error clearing leaderboard: %w", err)
+	}
+	return nil
 }

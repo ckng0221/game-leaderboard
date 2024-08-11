@@ -10,6 +10,7 @@ WORKDIR /app
 COPY go.work go.work.sum ./
 
 COPY apps/api/go.mod apps/api/go.sum ./apps/api/
+COPY apps/api/ ./apps/api/
 COPY apps/leaderboard/ ./apps/leaderboard/
 
 WORKDIR /app/apps/${service}
