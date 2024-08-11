@@ -51,6 +51,8 @@ func main() {
 		}
 	}()
 
+	utils.ClearLeaderboardCron()
+
 	// Block main thread
 	log.Println("Listening score event...")
 	select {}

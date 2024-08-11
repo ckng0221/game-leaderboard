@@ -3,6 +3,7 @@ package utils
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
 
 	"github.com/redis/go-redis/v9"
@@ -58,4 +59,13 @@ func GetUserByRank(client *redis.Client, rank int) ([]redis.Z, error) {
 	}
 
 	return results, nil
+}
+
+func ClearLeaderboard(client *redis.Client) error {
+	ctx := context.Background()
+	err := client.Del(ctx, "leaderboard").Err()
+	if err != nil {
+		return fmt.Errorf("error clearing leaderboard: %w", err)
+	}
+	return nil
 }
