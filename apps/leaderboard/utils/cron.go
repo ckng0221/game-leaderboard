@@ -14,7 +14,7 @@ func ClearLeaderboardCron() {
 	c.AddFunc("0 * * * * *", func() {
 		currentTime := time.Now()
 
-		log.Println("Current time:", time.Now().Format("2006-01-02 15:04"))
+		// log.Println("Current time:", time.Now().Format("2006-01-02 15:04"))
 
 		// Check if it's 00:00 of the first day of the month
 		if currentTime.Hour() == 0 && currentTime.Minute() == 0 && currentTime.Day() == 1 {
